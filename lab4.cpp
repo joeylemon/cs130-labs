@@ -92,6 +92,9 @@ int main(int argc, char *argv[]) {
         
         // Begin the game
         PlayGame();
+        
+        // Return the memory
+        delete [] Dungeon.rooms;
     }else{
         // Print an error if the file can't open
         printf("That file doesn't exist.\n");
