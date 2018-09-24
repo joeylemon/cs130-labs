@@ -22,13 +22,8 @@ int main(int argc, char *argv[]) {
     }
     char dkey = argv[2][0];
     
-    // Ensure the nkey is a valid integer
-    std::istringstream ss(argv[3]);
-    int nkey;
-    if(!(ss >> nkey) || !ss.eof()){
-        printf("Invalid nkey: %s\n", argv[3]);
-        return 0;
-    }
+    // Convert the nkey to an integer
+    int nkey = atoi(argv[3]);
     
     // Open the given file
     FILE *fin = fopen(argv[1], "rb");
@@ -44,8 +39,6 @@ int main(int argc, char *argv[]) {
     int size = ftell(fin);
     fseek(fin, 0, SEEK_SET);
     
-    int chunkCount = 0;
-    
     // Get max amount of chunks by dividing size by 8
     int maxChunk = size / 8;
     
@@ -53,7 +46,7 @@ int main(int argc, char *argv[]) {
     char* data = new char[maxChunk];
     
     // Read the file until we reach the end
-    while(ftell(fin) != size){
+    for(int i = 0; ftell(fin) != size; i++){
         char dataChar;
         char decryptChar;
         int dataIndex;
@@ -74,19 +67,20 @@ int main(int argc, char *argv[]) {
         
         // Ensure the index isn't out of bounds
         if(decryptIndex < 0 || decryptIndex >= maxChunk){
-            printf("Error decoding chunk #%d\nGot index %d, but max chunks is %d\n", chunkCount, decryptIndex, maxChunk);
+            printf("Error decoding chunk #%d\nGot index %d, but max chunks is %d\n", i, decryptIndex, maxChunk);
             return 0;
         }
         
         // Add the char to the array at the index
         data[decryptIndex] = decryptChar;
-        
-        // Keep track of which chunk we're on for error outputs
-        chunkCount++;
     }
     
-    // Print the decrypted string
-    printf("%s", data);
+    // If the decrypted string already has a newline, don't include one while printing
+    if(data[strlen(data) - 1] == '\n'){
+        printf("%s", data);
+    }else{
+        printf("%s\n", data);
+    }
     
     // Close the file
     fclose(fin);
