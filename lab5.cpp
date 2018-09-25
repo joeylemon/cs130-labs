@@ -23,7 +23,8 @@ int main(int argc, char *argv[]) {
     char dkey = argv[2][0];
     
     // Convert the nkey to an integer
-    int nkey = atoi(argv[3]);
+    int nkey;
+    sscanf(argv[3], "%d", &nkey);
     
     // Open the given file
     FILE *fin = fopen(argv[1], "rb");
