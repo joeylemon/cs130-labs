@@ -5,6 +5,7 @@
 // 9/28/18
 // TA: Jacob
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <sstream>
 
@@ -35,9 +36,10 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     
-    // Determine the size of the file
+    // Determine the size of the file by seeking to the end and using ftell()
     fseek(fin, 0, SEEK_END);
     int size = ftell(fin);
+    // Seek back to the beginning of the file
     fseek(fin, 0, SEEK_SET);
     
     // Get max amount of chunks by dividing size by 8
@@ -46,7 +48,7 @@ int main(int argc, char *argv[]) {
     // Create new char array with size of max chunks
     char* data = new char[maxChunk];
     
-    // Read the file until we reach the end
+    // Read the file until we reach the last byte
     for(int i = 0; ftell(fin) != size; i++){
         char dataChar;
         char decryptChar;
