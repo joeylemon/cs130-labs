@@ -10,7 +10,7 @@ usage: .asciz "Usage: %s <left> <op> <right>\n"
 .global main
 main:
     // Allocate bytes on the stack
-    addi    sp, sp, -25
+    addi    sp, sp, -21
 
     // Store the return address
     sd      ra, 0(sp)
@@ -30,7 +30,7 @@ main:
 
     // Save operator and right string since they might be overwritten
     sb      t2, 8(sp)       // save operator at sp + 8
-    sd      t3, 17(sp)      // save right string at sp + 17
+    sd      t3, 13(sp)      // save right string at sp + 13
 
     // Scan the left operand
     mv      a0, t1          // a0 = left string
@@ -39,7 +39,7 @@ main:
     call    sscanf@plt
 
     // Scan the right operand
-    ld      a0, 17(sp)      // load a0 from sp + 17 (right string loc)
+    ld      a0, 13(sp)      // load a0 from sp + 13 (right string loc)
     la      a1, scan        // a1 = scan string
     addi    a2, sp, 13      // a2 = sp + 13
     call    sscanf@plt
@@ -129,6 +129,6 @@ return:
     ld      ra, 0(sp)
 
     // Return the bytes to the stack
-    addi    sp, sp, 25
+    addi    sp, sp, 21
 
     ret
