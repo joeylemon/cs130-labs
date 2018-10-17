@@ -1,6 +1,10 @@
 // Lab 8
+// COSC130
+// This program takes a mathematical expression
+// from the user and calculates the result
+// Joey Lemon
+// 10/19/18
 .section .rodata
-arguments: .asciz "Left: %d, Op: %d, Right: %d\n"
 scan: .asciz "%d"
 result: .asciz "%d %c %d = %d\n"
 unknown: .asciz "Unknown operator \'%c\'\n"
@@ -18,9 +22,9 @@ main:
     // Ensure there are 4 arguments
     ld      t1, 0(a1)       // t1 = a1[0]
     li      t0, 4
-    bne     a0, t0, bad_args
+    bne     a0, t0, 7f      // a0 != t0
 
-    // Load in all command-line arguments
+    // Load in all command-line arguments (pointers are 8 bytes each)
     ld      t1, 8(a1)       // left = a1[1]
     ld      t2, 16(a1)      // op = a1[2]
     ld      t3, 24(a1)      // right = a1[3]
@@ -45,78 +49,68 @@ main:
     call    sscanf@plt
 
     // Load the operands and operator
-    lw      a1, 9(sp)       // load left int from sp + 9
+    lw      a0, 9(sp)       // load left int from sp + 9
     lb      a2, 8(sp)       // load op from sp + 8
-    lw      a3, 13(sp)      // load right int from sp + 13
+    lw      a1, 13(sp)      // load right int from sp + 13
 
     // Check what operator was input
-    li      t0, 43          // 43 is +
-    beq     a2, t0, add
+    li      t0, '+'
+    beq     a2, t0, 1f
 
-    li      t0, 45          // 45 is -
-    beq     a2, t0, subtract
+    li      t0, '-'
+    beq     a2, t0, 2f
 
-    li      t0, 120         // 120 is x
-    beq     a2, t0, multiply
+    li      t0, 'x'
+    beq     a2, t0, 3f
 
-    li      t0, 47          // 47 is /
-    beq     a2, t0, divide
+    li      t0, '/'
+    beq     a2, t0, 4f
 
-    li      t0, 37          // 37 is %
-    beq     a2, t0, mod
+    li      t0, '%'
+    beq     a2, t0, 5f
 
     // If the program hasn't jumped, we don't know the operator
-    j       unknown_op
+    j       6f
 
-add:
-    add     a4, a1, a3
-    j       print_result
+1: // Add
+    call    AddNums
+    mv      a4, a0
 
-subtract:
-    sub     a4, a1, a3
-    j       print_result
+    j       8f
 
-multiply:
-    mul     a4, a1, a3
-    j       print_result
+2: // Subtract
+    call    SubNums
+    mv      a4, a0
+    j       8f
 
-divide:
-    // Check if dividing by 0
-    beq     a3, zero, divide_by_0
+3: // Multiply
+    call    MulNums
+    mv      a4, a0
+    j       8f
 
-    div     a4, a1, a3
-    j       print_result
+4: // Divide
+    call    DivNums
+    mv      a4, a0
+    j       8f
 
-divide_by_0:
-    // Set result to -1
-    li      a4, -1
-    j       print_result
+5: // Remainder
+    call    ModNums
+    mv      a4, a0
+    j       8f
 
-mod:
-    // Check if mod by 0
-    beq     a3, zero, mod_by_0
-
-    rem     a4, a1, a3
-    j       print_result
-
-mod_by_0:
-    // Set result to 0
-    li      a4, 0
-    j       print_result
-
-unknown_op:
+6: // Unknown operator
     la      a0, unknown
     mv      a1, a2          // a1 = operator
     call    printf@plt
-    j       return
+    j       9f
 
-bad_args:
+7: // Bad arguments
     mv      a1, t1
     la      a0, usage
     call    printf@plt
-    j       return
+    j       9f
 
-print_result:
+8: // Print the result
     lw      a1, 9(sp)       // load left int from sp + 9
     lb      a2, 8(sp)       // load op from sp + 8
     lw      a3, 13(sp)      // load right int from sp + 13
@@ -124,11 +118,49 @@ print_result:
     la      a0, result
     call    printf@plt
 
-return:
+9: // Clean up the stack
     // Restore ra to what we found it as
     ld      ra, 0(sp)
 
     // Return the bytes to the stack
     addi    sp, sp, 21
 
+    ret
+
+// int AddNums(int left, int right)
+//     a0        a0         a1
+AddNums:
+    add     a0, a0, a1
+    ret
+
+// int SubNums(int left, int right)
+//     a0        a0         a1
+SubNums:
+    sub     a0, a0, a1
+    ret
+
+// int MulNums(int left, int right)
+//     a0        a0         a1
+MulNums:
+    mul     a0, a0, a1
+    ret
+
+// int DivNums(int left, int right)
+//     a0        a0         a1
+DivNums:
+    beq     a1, zero, 1f
+    div     a0, a0, a1
+    ret
+1: // Right num is 0
+    li      a0, -1
+    ret
+
+// int ModNums(int left, int right)
+//     a0        a0         a1
+ModNums:
+    beq     a1, zero, 1f
+    rem     a0, a0, a1
+    ret
+1: // Right num is 0
+    li      a0, 0
     ret

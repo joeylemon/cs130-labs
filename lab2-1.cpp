@@ -31,7 +31,8 @@ class BITSET {
         // Since int rounds down, diving bit by 32 gives the set
         int set = bit / 32;
         
-        // Set the correct bit within the set
+        // Use the correct bit within the set
+        // Not necessary, but helps keep track of what is happening
         bit -= (32 * set);
         
         // Left shifting 0b...0001 by "bit" lets you test the bit 

@@ -85,8 +85,7 @@ Real Decode(int float_value) {
     // Find the sign bit value by moving it to bit index 0 and ANDing 1
     real.sign = (float_value >> 31) & 1;
     
-    // Isolate the 8 exponent bits and right-shift them to the end of the number
-    // and then subtract the bias of 127
+    // Isolate the 8 exponent bits and right-shift them to the end of the number	// and then subtract the bias of 127
     real.exponent = ((float_value & 0x7F800000) >> 23) - 127;
     
     // Isolate the 23 fraction bits and add the implied 1 to bit index 24
