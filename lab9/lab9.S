@@ -3,7 +3,7 @@
 // This program searches an array for a person or finds the median
 // of an integer array
 // Joey Lemon
-// 11/3/18
+// 11/2/18
 
 .section .text
 .global Search
