@@ -5,9 +5,6 @@
 // Joey Lemon
 // 11/3/18
 
-.section .rodata
-name: .asciz "Name: %c\n"
-
 .section .text
 .global Search
 Search:
