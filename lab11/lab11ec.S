@@ -1,6 +1,7 @@
 // Lab 11
 // COSC130
-// This program dissects a virtual address
+// This program converts a leaf page table entry
+// into a physical address
 // Joey Lemon
 // 11/9/18
 
