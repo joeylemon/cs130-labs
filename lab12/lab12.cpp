@@ -354,7 +354,7 @@ int main(int argc, char *argv[]) {
         instructions[i] = instr;
     }
     
-    // Close the file
+    // Close the input file
     fclose(fin);
     
     // Open the output file for writing
@@ -365,7 +365,7 @@ int main(int argc, char *argv[]) {
         instructions[i].writeToFile(fout);
     }
     
-    // Close the file
+    // Close the output file
     fclose(fout);
     
     // Print the result to console
