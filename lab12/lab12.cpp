@@ -6,7 +6,6 @@
 // TA: Jacob
 
 #include <cstdio>
-#include <cstring>
 #include <string>
 
 // Array to hold names of ABI registers
