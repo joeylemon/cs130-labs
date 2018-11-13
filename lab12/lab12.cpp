@@ -25,6 +25,9 @@ const int BITS_12_7 = 0xF80;
 // Global variable to determine if program is using ABI names
 bool USE_ABI = false;
 
+// Convert a number into it's register equivalent
+std::string toRegister(int num);
+
 // A class to hold an instruction
 class Instruction {
     private:
@@ -39,7 +42,7 @@ class Instruction {
     // Default constructor
     Instruction(){}
     
-    // Constructor to disassemble an instruction
+    // Constructor to disassemble the instruction
     Instruction(int a1){
         binary = a1;
         
@@ -55,20 +58,17 @@ class Instruction {
         // Disassemble the instruction based on op codes
         if(op == 0b0110111){            // LUI
             // arg1 is bits 12-7
-            int a1 = (binary & BITS_12_7) >> 7;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
             
             // arg2 is bits 31-12
-            int a2 = (binary & 0xFFFFF000);
-            arg2 = std::to_string(a2);
+            arg2 = std::to_string(binary & 0xFFFFF000);
             
             format = "%s, %s";
             
             name = "lui";
         }else if(op == 0b1101111){      // JAL
             // arg1 is bits 12-7
-            int a1 = (binary & BITS_12_7) >> 7;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
             
             // arg2 is bits 1-20, but must be put in correct order
             int b19_12 = binary & 0xFF000;      // bits 19-12
@@ -77,40 +77,33 @@ class Instruction {
             int b20 = binary & 0x80000000;      // bit 20
             
             // Assemble the assorted bits into the correct order
-            int a2 = ((b20 | (b19_12 << 11) | (b11 << 2)) | (b10_1 >> 9)) >> 11;
-            arg2 = std::to_string(a2);
+            arg2 = std::to_string(((b20 | (b19_12 << 11) | (b11 << 2)) | (b10_1 >> 9)) >> 11);
             
             format = "%s, %s";
             
             name = "jal";
         }else if(op == 0b1100111){      // JALR
             // arg1 is bits 12-7
-            int a1 = (binary & BITS_12_7) >> 7;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
             
             // arg2 is bits 20-15
-            int a2 = (binary & BITS_20_15) >> 15;
-            arg2 = USE_ABI ? ABI_REGS[a2] : "x" + std::to_string(a2);
+            arg2 = toRegister((binary & BITS_20_15) >> 15);
             
             // arg3 is first 12 bits
-            int a3 = binary >> 20;
-            arg3 = std::to_string(a3);
+            arg3 = std::to_string(binary >> 20);
             
             format = "%s, %s, %s";
             
             name = "jalr";
         }else if(op == 0b0000011){      // LOAD
             // arg1 is bits 12-7
-            int a1 = (binary & BITS_12_7) >> 7;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
             
             // arg3 is bits 20-15
-            int a3 = (binary & BITS_20_15) >> 15;
-            arg3 = USE_ABI ? ABI_REGS[a3] : "x" + std::to_string(a3);
+            arg3 = toRegister((binary & BITS_20_15) >> 15);
             
             // arg2 is first 12 bits
-            int a2 = binary >> 20;
-            arg2 = std::to_string(a2);
+            arg2 = std::to_string(binary >> 20);
             
             format = "%s, %s(%s)";
             
@@ -131,16 +124,13 @@ class Instruction {
             }
         }else if(op == 0b0100011){      // STORE
             // arg1 is bits 25-20
-            int a1 = (binary & BITS_25_20) >> 20;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_25_20) >> 20);
             
             /// arg3 is bits 20-15
-            int a3 = (binary & BITS_20_15) >> 15;
-            arg3 = USE_ABI ? ABI_REGS[a3] : "x" + std::to_string(a3);
+            arg3 = toRegister((binary & BITS_20_15) >> 15);
             
             // arg2 is bits 32-20 and 12-7, but must be put in order
-            int a2 = ((binary >> 20) & 0x1F000) | ((binary & BITS_12_7) >> 7);
-            arg2 = std::to_string(a2);
+            arg2 = std::to_string(((binary >> 20) & 0x1F000) | ((binary & BITS_12_7) >> 7));
             
             format = "%s, %s(%s)";
             
@@ -155,16 +145,13 @@ class Instruction {
             }
         }else if(op == 0b0010011){      // IMMEDIATE
             // arg1 is bits 12-7
-            int a1 = (binary & BITS_12_7) >> 7;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
             
             // arg2 is bits 20-15
-            int a2 = (binary & BITS_20_15) >> 15;
-            arg2 = USE_ABI ? ABI_REGS[a2] : "x" + std::to_string(a2);
+            arg2 = toRegister((binary & BITS_20_15) >> 15);
             
             // arg3 is first 12 bits
-            int a3 = binary >> 20;
-            arg3 = std::to_string(a3);
+            arg3 = std::to_string(binary >> 20);
             
             format = "%s, %s, %s";
             
@@ -185,24 +172,20 @@ class Instruction {
             }else if(extop == 0b101){
                 if(open == 0b0100000){
                     name = "srai";
-                    a3 = (binary & BITS_25_20) >> 20;
-                    arg3 = std::to_string(a3);
+                    arg3 = std::to_string((binary & BITS_25_20) >> 20);
                 }else{
                     name = "srli";
                 }
             }
         }else if(op == 0b0110011){      // EXECUTE
             // arg1 is bits 12-7
-            int a1 = (binary & BITS_12_7) >> 7;
-            arg1 = USE_ABI ? ABI_REGS[a1] : "x" + std::to_string(a1);
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
             
             // arg2 is bits 20-15
-            int a2 = (binary & BITS_20_15) >> 15;
-            arg2 = USE_ABI ? ABI_REGS[a2] : "x" + std::to_string(a2);
+            arg2 = toRegister((binary & BITS_20_15) >> 15);
             
             // arg3 is bits 25-20
-            int a3 = (binary & BITS_25_20) >> 20;
-            arg3 = USE_ABI ? ABI_REGS[a3] : "x" + std::to_string(a3);
+            arg3 = toRegister((binary & BITS_25_20) >> 20);
             
             format = "%s, %s, %s";
             
@@ -230,6 +213,27 @@ class Instruction {
                 name = "or";
             }else if(extop == 0b111){
                 name = "and";
+            }
+        }else if(op == 0b0011011){      // SHIFT W
+            // arg1 is bits 12-7
+            arg1 = toRegister((binary & BITS_12_7) >> 7);
+            
+            // arg2 is bits 20-15
+            arg2 = toRegister((binary & BITS_20_15) >> 15);
+            
+            // arg3 is bits 25-20
+            arg3 = toRegister((binary & BITS_25_20) >> 20);
+
+            format = "%s, %s, %s";
+
+            if(extop == 0b001){
+                name = "slliw";
+            }else if(extop == 0b101){
+                if(open == 0b0100000){
+                    name = "sraiw";
+                }else{
+                    name = "srliw";
+                }
             }
         }
     }
@@ -370,4 +374,8 @@ int main(int argc, char *argv[]) {
     
     delete [] instructions;
     return 0;
+}
+
+std::string toRegister(int num) {
+    return USE_ABI ? ABI_REGS[num] : "x" + std::to_string(num);
 }
