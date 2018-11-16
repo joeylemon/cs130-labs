@@ -114,12 +114,14 @@ class Instruction {
                 name = "lw";
             }else if(extop == 0b011){
                 name = "ld";
-            }else if(extop == 0b110){
-                name = "lwu";
             }else if(extop == 0b100){
                 name = "lbu";
             }else if(extop == 0b101){
                 name = "lhu";
+            }else if(extop == 0b110){
+                name = "lwu";
+            }else{
+                format = "invalid";
             }
         }else if(op == 0b0100011){      // STORE
             // arg1 is bits 25-20
@@ -141,6 +143,8 @@ class Instruction {
                 name = "sw";
             }else if(extop == 0b011){
                 name = "sd";
+            }else{
+                format = "invalid";
             }
         }else if(op == 0b0010011){      // IMMEDIATE
             // arg1 is bits 12-7
@@ -175,6 +179,8 @@ class Instruction {
                 }else{
                     name = "srli";
                 }
+            }else{
+                format = "invalid";
             }
         }else if(op == 0b0110011){      // EXECUTE
             // arg1 is bits 12-7
@@ -188,7 +194,9 @@ class Instruction {
             
             format = "%s, %s, %s";
             
-            if(extop == 0b000){
+            if(open == 1){
+                format = "invalid";
+            }else if(extop == 0b000){
                 if(open == 0b0100000){
                     name = "sub";
                 }else{
@@ -212,6 +220,8 @@ class Instruction {
                 name = "or";
             }else if(extop == 0b111){
                 name = "and";
+            }else{
+                format = "invalid";
             }
         }else if(op == 0b0011011){      // SHIFT W
             // arg1 is bits 12-7
@@ -233,6 +243,8 @@ class Instruction {
                 }else{
                     name = "srliw";
                 }
+            }else{
+                format = "invalid";
             }
         }
     }
